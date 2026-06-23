@@ -1,0 +1,131 @@
+[gd_scene load_steps=7 format=3 uid="uid://player_scene"]
+
+[ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
+[ext_resource type="PackedScene" uid="uid://pistol_weapon" path="res://scenes/weapons/pistol.tscn" id="2_pistol"]
+[ext_resource type="PackedScene" uid="uid://rifle_weapon" path="res://scenes/weapons/rifle.tscn" id="3_rifle"]
+[ext_resource type="PackedScene" uid="uid://shotgun_weapon" path="res://scenes/weapons/shotgun.tscn" id="4_shotgun"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.4
+height = 1.8
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 2
+script = ExtResource("1_player")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="BodyMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+visible = false
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="Head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Head"]
+fov = 75.0
+
+[node name="WeaponHolder" type="Node3D" parent="Head/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, -0.2, -0.4)
+
+[node name="Pistol" parent="Head/Camera3D/WeaponHolder" instance=ExtResource("2_pistol")]
+
+[node name="Rifle" parent="Head/Camera3D/WeaponHolder" instance=ExtResource("3_rifle")]
+visible = false
+
+[node name="Shotgun" parent="Head/Camera3D/WeaponHolder" instance=ExtResource("4_shotgun")]
+visible = false
+
+[node name="FootstepPlayer" type="AudioStreamPlayer3D" parent="."]
+volume_db = -6.0
+
+[node name="UISoundPlayer" type="AudioStreamPlayer" parent="."]
+
+[node name="HUD" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Crosshair" type="Control" parent="HUD"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -12.0
+offset_top = -12.0
+offset_right = 12.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HLine" type="ColorRect" parent="HUD/Crosshair"]
+layout_mode = 0
+offset_left = -10.0
+offset_top = -1.0
+offset_right = 10.0
+offset_bottom = 1.0
+color = Color(1, 1, 1, 0.85)
+
+[node name="VLine" type="ColorRect" parent="HUD/Crosshair"]
+layout_mode = 0
+offset_left = -1.0
+offset_top = -10.0
+offset_right = 1.0
+offset_bottom = 10.0
+color = Color(1, 1, 1, 0.85)
+
+[node name="WeaponLabel" type="Label" parent="HUD"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -80.0
+offset_right = 300.0
+offset_bottom = -50.0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 22
+text = "Pistol"
+
+[node name="AmmoLabel" type="Label" parent="HUD"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -50.0
+offset_right = 300.0
+offset_bottom = -20.0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 18
+text = "12 / 12"
+
+[node name="HelpLabel" type="Label" parent="HUD"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -360.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 120.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 14
+text = "WASD - Move | Space - Jump
+Move Mouse - Look Around | LMB - Shoot
+R - Reload | 1/2/3 or Scroll - Switch Guns
+Esc - Release Mouse | Click - Re-capture Mouse"
+horizontal_alignment = 2

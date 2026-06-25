@@ -1,6 +1,7 @@
 extends Node3D
 
 const TARGET_SCENE := preload("res://scenes/target.tscn")
+const DRAGON_SCENE := preload("res://scenes/dragon.tscn")
 const MAP_HALF := 120.0
 const TILE_SPACING := 11.0
 
@@ -27,6 +28,7 @@ func _ready() -> void:
 	_build_perimeter_bunkers()
 	_build_cover_clusters()
 	_spawn_targets()
+	_spawn_dragons()
 	_setup_ambient_audio()
 
 
@@ -318,6 +320,24 @@ func _spawn_targets() -> void:
 		target.position = spot[0]
 		target.rotation.y = spot[1]
 		root.add_child(target)
+
+
+func _spawn_dragons() -> void:
+	var root := Node3D.new()
+	root.name = "Dragons"
+	add_child(root)
+
+	var spots: Array[Vector3] = [
+		Vector3(0.0, 14.0, -40.0),
+		Vector3(-70.0, 16.0, 0.0),
+		Vector3(70.0, 12.0, 30.0),
+		Vector3(0.0, 18.0, 60.0),
+	]
+
+	for spot in spots:
+		var dragon := DRAGON_SCENE.instantiate()
+		dragon.position = spot
+		root.add_child(dragon)
 
 
 func _add_wall(wall_name: String, position: Vector3, size: Vector3, material: StandardMaterial3D) -> void:

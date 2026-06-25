@@ -92,6 +92,59 @@ static func build_crate(parent: Node3D, size: Vector3 = Vector3(2.0, 1.5, 2.0)) 
 	_add_box(parent, Vector3(size.x * 0.51, 0.0, 0.0), Vector3(0.06, size.y * 0.85, size.z * 0.85), wood_dark, "PlankSide")
 
 
+static func build_dragon(parent: Node3D) -> Dictionary:
+	_clear_children(parent)
+	var scale_green := _dragon_scale()
+	var scale_dark := _dragon_scale_dark()
+	var belly := _dragon_belly()
+	var horn := _dragon_horn()
+	var eye := _dragon_eye()
+
+	var body := _add_box(parent, Vector3(0.0, 0.0, 0.4), Vector3(2.4, 1.4, 3.6), scale_green, "Body")
+	_add_box(parent, Vector3(0.0, -0.35, 0.5), Vector3(1.8, 0.5, 2.8), belly, "Belly")
+
+	var neck := _add_cylinder(parent, Vector3(0.0, 0.8, -1.2), 0.55, 1.4, scale_green, Vector3.AXIS_Z, "Neck")
+	neck.rotation_degrees = Vector3(-35.0, 0.0, 0.0)
+
+	var head := _add_box(parent, Vector3(0.0, 1.3, -2.4), Vector3(1.1, 0.9, 1.4), scale_dark, "Head")
+	_add_box(parent, Vector3(0.0, 1.15, -3.2), Vector3(0.7, 0.55, 1.2), scale_green, "Snout")
+	_add_box(parent, Vector3(-0.35, 1.65, -2.2), Vector3(0.15, 0.35, 0.15), horn, "HornLeft")
+	_add_box(parent, Vector3(0.35, 1.65, -2.2), Vector3(0.15, 0.35, 0.15), horn, "HornRight")
+	_add_box(parent, Vector3(-0.28, 1.45, -2.95), Vector3(0.12, 0.12, 0.12), eye, "EyeLeft")
+	_add_box(parent, Vector3(0.28, 1.45, -2.95), Vector3(0.12, 0.12, 0.12), eye, "EyeRight")
+
+	var left_wing := Node3D.new()
+	left_wing.name = "LeftWing"
+	left_wing.position = Vector3(-1.3, 0.5, 0.2)
+	parent.add_child(left_wing)
+	_add_box(left_wing, Vector3(-1.6, 0.0, 0.0), Vector3(3.2, 0.08, 1.8), scale_dark, "WingMembrane")
+	_add_box(left_wing, Vector3(-0.6, 0.05, 0.0), Vector3(0.18, 0.14, 1.4), horn, "WingBone")
+
+	var right_wing := Node3D.new()
+	right_wing.name = "RightWing"
+	right_wing.position = Vector3(1.3, 0.5, 0.2)
+	parent.add_child(right_wing)
+	_add_box(right_wing, Vector3(1.6, 0.0, 0.0), Vector3(3.2, 0.08, 1.8), scale_dark, "WingMembrane")
+	_add_box(right_wing, Vector3(0.6, 0.05, 0.0), Vector3(0.18, 0.14, 1.4), horn, "WingBone")
+
+	var tail := _add_cylinder(parent, Vector3(0.0, 0.1, 2.4), 0.35, 2.2, scale_green, Vector3.AXIS_Z, "TailBase")
+	tail.rotation_degrees = Vector3(25.0, 0.0, 0.0)
+	var tail_tip := _add_cylinder(parent, Vector3(0.0, 0.55, 3.6), 0.2, 1.4, scale_dark, Vector3.AXIS_Z, "TailTip")
+	tail_tip.rotation_degrees = Vector3(40.0, 0.0, 0.0)
+
+	_add_cylinder(parent, Vector3(-0.9, -0.5, -0.4), 0.22, 1.0, scale_dark, Vector3.AXIS_Y, "LegFrontLeft")
+	_add_cylinder(parent, Vector3(0.9, -0.5, -0.4), 0.22, 1.0, scale_dark, Vector3.AXIS_Y, "LegFrontRight")
+	_add_cylinder(parent, Vector3(-0.8, -0.5, 1.2), 0.2, 0.9, scale_dark, Vector3.AXIS_Y, "LegBackLeft")
+	_add_cylinder(parent, Vector3(0.8, -0.5, 1.2), 0.2, 0.9, scale_dark, Vector3.AXIS_Y, "LegBackRight")
+
+	return {
+		"body": body,
+		"left_wing": left_wing,
+		"right_wing": right_wing,
+		"head": head,
+	}
+
+
 static func build_barrel(parent: Node3D) -> void:
 	_clear_children(parent)
 	var metal := _metal_dark()
@@ -230,4 +283,44 @@ static func _target_black() -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = Color(0.05, 0.05, 0.05)
 	mat.roughness = 0.8
+	return mat
+
+
+static func _dragon_scale() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.12, 0.42, 0.18)
+	mat.metallic = 0.15
+	mat.roughness = 0.55
+	return mat
+
+
+static func _dragon_scale_dark() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.08, 0.28, 0.12)
+	mat.metallic = 0.2
+	mat.roughness = 0.5
+	return mat
+
+
+static func _dragon_belly() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.55, 0.48, 0.22)
+	mat.roughness = 0.7
+	return mat
+
+
+static func _dragon_horn() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.35, 0.32, 0.28)
+	mat.metallic = 0.4
+	mat.roughness = 0.45
+	return mat
+
+
+static func _dragon_eye() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.85, 0.1)
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.6, 0.05)
+	mat.emission_energy_multiplier = 2.0
 	return mat

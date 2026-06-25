@@ -76,6 +76,42 @@ static func empty_click() -> AudioStreamWAV:
 	, 0.04)
 
 
+static func dragon_roar() -> AudioStreamWAV:
+	return _make_stream(func(t: float, _d: float) -> float:
+		var env := exp(-t * 4.5)
+		var noise := randf_range(-1.0, 1.0)
+		var growl := sin(TAU * 55.0 * t) * 0.7 + sin(TAU * 33.0 * t) * 0.4
+		return (noise * 0.5 + growl) * env
+	, 0.9)
+
+
+static func dragon_fire() -> AudioStreamWAV:
+	return _make_stream(func(t: float, _d: float) -> float:
+		var env := exp(-t * 6.0)
+		var noise := randf_range(-1.0, 1.0)
+		var whoosh := sin(TAU * 180.0 * t + t * t * 40.0) * 0.3
+		return (noise * 0.85 + whoosh) * env
+	, 0.55)
+
+
+static func dragon_bite() -> AudioStreamWAV:
+	return _make_stream(func(t: float, _d: float) -> float:
+		var env := exp(-t * 18.0)
+		var snap := sin(TAU * 220.0 * t) * 0.6
+		var noise := randf_range(-1.0, 1.0) * 0.4
+		return (snap + noise) * env
+	, 0.2)
+
+
+static func player_hurt() -> AudioStreamWAV:
+	return _make_stream(func(t: float, _d: float) -> float:
+		var env := exp(-t * 12.0)
+		var tone := sin(TAU * 160.0 * t) * 0.5
+		var noise := randf_range(-1.0, 1.0) * 0.3
+		return (tone + noise) * env
+	, 0.25)
+
+
 static func ambient_wind() -> AudioStreamWAV:
 	return _make_stream(func(t: float, _d: float) -> float:
 		var noise := randf_range(-1.0, 1.0)

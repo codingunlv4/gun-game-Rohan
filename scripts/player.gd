@@ -4,6 +4,11 @@ const MOVE_SPEED := 7.0
 const JUMP_VELOCITY := 4.8
 const MOUSE_SENSITIVITY := 0.003
 const FOOTSTEP_DISTANCE := 2.2
+const MAX_HEALTH := 100.0
+const DAMAGE_FLASH_TIME := 0.15
+const RESPAWN_DELAY := 2.0
+
+@export var max_health: float = MAX_HEALTH
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
@@ -16,9 +21,21 @@ var weapons: Array[Weapon] = []
 var current_weapon_index: int = 0
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var _distance_since_footstep: float = 0.0
+var _health: float
+var _alive: bool = true
+var _spawn_position: Vector3
+var _spawn_rotation: Vector3
+var _hurt_player: AudioStreamPlayer3D
 
 
 func _ready() -> void:
+	add_to_group("player")
+	_health = max_health
+	_spawn_position = global_position
+	_spawn_rotation = rotation
+	_hurt_player = AudioStreamPlayer3D.new()
+	_hurt_player.stream = AudioFactory.player_hurt()
+	add_child(_hurt_player)
 	call_deferred("_capture_mouse")
 	_collect_weapons()
 	_switch_weapon(0, false)
@@ -63,7 +80,57 @@ func _rotate_view(relative: Vector2) -> void:
 	head.rotation.x = clampf(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
 
 
+func take_damage(amount: float, _hit_position: Vector3 = Vector3.ZERO) -> void:
+	if not _alive:
+		return
+
+	_health -= amount
+	_hurt_player.pitch_scale = randf_range(0.9, 1.1)
+	_hurt_player.play()
+	_flash_damage()
+
+	if _health <= 0.0:
+		_die()
+
+
+func _flash_damage() -> void:
+	if not hud:
+		return
+
+	var crosshair: Control = hud.get_node("Crosshair")
+	crosshair.modulate = Color(1.0, 0.2, 0.2)
+	await get_tree().create_timer(DAMAGE_FLASH_TIME).timeout
+	if is_instance_valid(crosshair):
+		crosshair.modulate = Color.WHITE
+
+
+func _die() -> void:
+	_alive = false
+	velocity = Vector3.ZERO
+	if hud:
+		var death_label: Label = hud.get_node_or_null("DeathLabel")
+		if death_label:
+			death_label.visible = true
+	await get_tree().create_timer(RESPAWN_DELAY).timeout
+	_respawn()
+
+
+func _respawn() -> void:
+	_health = max_health
+	_alive = true
+	global_position = _spawn_position
+	rotation = _spawn_rotation
+	velocity = Vector3.ZERO
+	if hud:
+		var death_label: Label = hud.get_node_or_null("DeathLabel")
+		if death_label:
+			death_label.visible = false
+
+
 func _physics_process(delta: float) -> void:
+	if not _alive:
+		return
+
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
@@ -156,3 +223,13 @@ func _update_hud() -> void:
 		ammo_label.text = "%d / %d" % [info.ammo, info.max_ammo]
 
 	crosshair.modulate = Color.WHITE if info.ammo > 0 and not info.reloading else Color.RED
+
+	var health_label: Label = hud.get_node_or_null("HealthLabel")
+	if health_label:
+		health_label.text = "Health: %d" % int(ceilf(_health))
+		if _health > 60.0:
+			health_label.modulate = Color(0.7, 1.0, 0.7)
+		elif _health > 30.0:
+			health_label.modulate = Color(1.0, 0.85, 0.4)
+		else:
+			health_label.modulate = Color(1.0, 0.35, 0.3)

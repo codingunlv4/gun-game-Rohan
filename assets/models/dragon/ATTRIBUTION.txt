@@ -1,0 +1,21 @@
+Dragon 3D models used in this game:
+
+PRIMARY GAMEPLAY MODEL (default)
+  File: assets/models/dragon/animated_dragon/dragon.glb
+  Source: Simple 3D Dragon Model by MattBas (OpenGameArt)
+  URL: https://opengameart.org/content/simple-3d-dragon-model
+  License: CC0 1.0
+  Animations used: Idle-loop, Flying-loop, Walk-loop
+
+SKETCHFAB MODEL ASSETS (bundled)
+  Folder: assets/models/dragon/celebration_sketchfab/
+  Model: Dragon (Celebration) by KaitlynAndrus (kand8998)
+  Sketchfab: https://sketchfab.com/3d-models/dragon-celebration-2d0973f9e6514c0d93ec2230d4807dd2
+  License: CC Attribution 4.0
+  Switch in Godot: set Dragon -> model_path to celebration_sketchfab/scene.gltf
+
+RECOMMENDED SKETCHFAB UPGRADE (manual download)
+  Animated Dragon Three Motion Loops by LasquetiSpice
+  https://sketchfab.com/3d-models/animated-dragon-three-motion-loops-eca98cf6cd084c1596cecf716e110c29
+  License: CC Attribution 4.0
+  Download GLB from Sketchfab, place in assets/models/dragon/, then set model_path.

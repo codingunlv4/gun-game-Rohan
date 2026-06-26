@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://target_scene"]
+
+[ext_resource type="Script" path="res://scripts/target.gd" id="1_target"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_target"]
+size = Vector3(0.95, 1.55, 0.4)
+
+[node name="Target" type="StaticBody3D"]
+script = ExtResource("1_target")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0.05)
+shape = SubResource("BoxShape3D_target")
+
+[node name="Model" type="Node3D" parent="."]

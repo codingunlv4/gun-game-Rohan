@@ -23,16 +23,12 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var _distance_since_footstep: float = 0.0
 var _health: float
 var _alive: bool = true
-var _spawn_position: Vector3
-var _spawn_rotation: Vector3
 var _hurt_player: AudioStreamPlayer3D
 
 
 func _ready() -> void:
 	add_to_group("player")
 	_health = max_health
-	_spawn_position = global_position
-	_spawn_rotation = rotation
 	_hurt_player = AudioStreamPlayer3D.new()
 	_hurt_player.stream = AudioFactory.player_hurt()
 	add_child(_hurt_player)
@@ -112,19 +108,7 @@ func _die() -> void:
 		if death_label:
 			death_label.visible = true
 	await get_tree().create_timer(RESPAWN_DELAY).timeout
-	_respawn()
-
-
-func _respawn() -> void:
-	_health = max_health
-	_alive = true
-	global_position = _spawn_position
-	rotation = _spawn_rotation
-	velocity = Vector3.ZERO
-	if hud:
-		var death_label: Label = hud.get_node_or_null("DeathLabel")
-		if death_label:
-			death_label.visible = false
+	get_tree().reload_current_scene()
 
 
 func _physics_process(delta: float) -> void:

@@ -329,17 +329,9 @@ func _spawn_dragons() -> void:
 	root.name = "Dragons"
 	add_child(root)
 
-	var spots: Array[Vector3] = [
-		Vector3(0.0, 14.0, -40.0),
-		Vector3(-70.0, 16.0, 0.0),
-		Vector3(70.0, 12.0, 30.0),
-		Vector3(0.0, 18.0, 60.0),
-	]
-
-	for spot in spots:
-		var dragon := DRAGON_SCENE.instantiate()
-		dragon.position = spot
-		root.add_child(dragon)
+	var dragon := DRAGON_SCENE.instantiate()
+	dragon.position = Vector3(0.0, 14.0, -40.0)
+	root.add_child(dragon)
 
 
 func _spawn_goblins() -> void:

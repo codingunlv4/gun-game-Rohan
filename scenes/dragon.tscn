@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://dragon_scene"]
+[gd_scene load_steps=6 format=3 uid="uid://dragon_scene"]
 
 [ext_resource type="Script" path="res://scripts/dragon.gd" id="1_dragon"]
 [ext_resource type="PackedScene" path="res://assets/models/dragon/animated_dragon/dragon.glb" id="2_model"]
@@ -9,6 +9,9 @@ height = 6.5
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_bite"]
 radius = 4.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_hurtbox"]
+radius = 5.5
 
 [node name="Dragon" type="CharacterBody3D"]
 collision_layer = 4
@@ -37,6 +40,16 @@ monitorable = false
 [node name="CollisionShape3D" type="CollisionShape3D" parent="BiteArea"]
 shape = SubResource("SphereShape3D_bite")
 
+[node name="Hurtbox" type="Area3D" parent="."]
+collision_layer = 4
+collision_mask = 0
+monitorable = true
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+shape = SubResource("SphereShape3D_hurtbox")
+
 [node name="RoarPlayer" type="AudioStreamPlayer3D" parent="."]
 volume_db = -2.0
 max_distance = 80.0
@@ -48,3 +61,7 @@ max_distance = 60.0
 [node name="BitePlayer" type="AudioStreamPlayer3D" parent="."]
 volume_db = -2.0
 max_distance = 40.0
+
+[node name="HitPlayer" type="AudioStreamPlayer3D" parent="."]
+volume_db = -4.0
+max_distance = 60.0

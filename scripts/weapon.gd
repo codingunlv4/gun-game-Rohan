@@ -122,8 +122,18 @@ func _fire_raycasts(camera: Camera3D) -> void:
 			continue
 
 		var collider: Object = result.collider
-		if collider and collider.has_method("take_damage"):
-			collider.take_damage(damage, result.position)
+		var damage_target := _resolve_damage_target(collider)
+		if damage_target:
+			damage_target.take_damage(damage, result.position)
+
+
+func _resolve_damage_target(collider: Object) -> Object:
+	var node := collider as Node
+	while node:
+		if node.has_method("take_damage"):
+			return node
+		node = node.get_parent()
+	return null
 
 
 func _play_shoot_effects() -> void:

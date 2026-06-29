@@ -37,6 +37,8 @@ const FIREBALL_SCENE := preload("res://scenes/dragon_fireball.tscn")
 @onready var roar_player: AudioStreamPlayer3D = $RoarPlayer
 @onready var fire_player: AudioStreamPlayer3D = $FirePlayer
 @onready var bite_player: AudioStreamPlayer3D = $BitePlayer
+@onready var hit_player: AudioStreamPlayer3D = $HitPlayer
+@onready var hurtbox: Area3D = $Hurtbox
 
 var _health: float
 var _player: Node3D
@@ -63,6 +65,7 @@ func _ready() -> void:
 	roar_player.stream = AudioFactory.dragon_roar()
 	fire_player.stream = AudioFactory.dragon_fire()
 	bite_player.stream = AudioFactory.dragon_bite()
+	hit_player.stream = AudioFactory.target_hit()
 	bite_area.body_entered.connect(_on_bite_area_body_entered)
 	call_deferred("_setup_model")
 	call_deferred("_find_player")
@@ -538,6 +541,8 @@ func take_damage(amount: float, _hit_position: Vector3 = Vector3.ZERO) -> void:
 		return
 
 	_health -= amount
+	hit_player.pitch_scale = randf_range(0.75, 0.95)
+	hit_player.play()
 	_flash_hit()
 
 	if _health <= 0.0:
@@ -566,7 +571,10 @@ func _die() -> void:
 	roar_player.pitch_scale = 0.8
 	roar_player.play()
 	velocity = Vector3.ZERO
-	set_collision_layer_value(1, false)
+	bite_area.monitoring = false
+	hurtbox.monitorable = false
+	hurtbox.monitoring = false
+	set_collision_layer_value(3, false)
 	set_collision_mask_value(1, false)
 
 	if _animation_player and not _anim_idle.is_empty():

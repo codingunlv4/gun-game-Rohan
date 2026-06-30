@@ -1,0 +1,8 @@
+Castle map environment used in this game:
+
+  Folder: assets/models/castle/sketchfab/
+  Format: glTF (scene.gltf + scene.bin + textures)
+  Source: Sketchfab (photogrammetry castle / rampart environment)
+  License: CC Attribution (verify on the original Sketchfab model page)
+
+The map is loaded at runtime by scripts/map_builder.gd as the primary level geometry.

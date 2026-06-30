@@ -1,10 +1,15 @@
 extends Node3D
 
-const TARGET_SCENE := preload("res://scenes/target.tscn")
 const DRAGON_SCENE := preload("res://scenes/dragon.tscn")
 const GOBLIN_SCENE := preload("res://scenes/goblin.tscn")
+const GOLEM_SCENE := preload("res://scenes/golem.tscn")
+const HEALTH_PICKUP_SCENE := preload("res://scenes/health_pickup.tscn")
+const CASTLE_SCENE := preload("res://assets/models/castle/sketchfab/scene.gltf")
+const TREE_SKETCHFAB := "res://assets/models/tree/sketchfab/tree.glb"
 const MAP_HALF := 120.0
 const TILE_SPACING := 11.0
+const CASTLE_SCALE := 2.5
+const CASTLE_SOURCE_CENTER := Vector3(5.042, -3.173, -5.82)
 
 var _concrete := StandardMaterial3D.new()
 var _metal := StandardMaterial3D.new()
@@ -14,23 +19,11 @@ var _accent := StandardMaterial3D.new()
 
 func _ready() -> void:
 	_setup_materials()
-	_build_floor()
-	_build_outer_walls()
-	_build_warehouse(Vector3(-70.0, 0.0, -70.0))
-	_build_warehouse(Vector3(70.0, 0.0, -70.0))
-	_build_warehouse(Vector3(-70.0, 0.0, 70.0))
-	_build_corridor_maze(Vector3(60.0, 0.0, 0.0))
-	_build_corridor_maze(Vector3(-60.0, 0.0, 0.0))
-	_build_elevated_arena(Vector3(0.0, 0.0, 75.0))
-	_build_elevated_arena(Vector3(0.0, 0.0, -75.0))
-	_build_sniper_lane()
-	_build_crossroads()
-	_build_open_yards()
-	_build_perimeter_bunkers()
-	_build_cover_clusters()
-	_spawn_targets()
-	_spawn_dragons()
-	_spawn_goblins()
+	_build_castle_map()
+	_build_safety_floor()
+	_spawn_trees()
+	call_deferred("_setup_enemy_spawner")
+	_spawn_health_pickups()
 	_setup_ambient_audio()
 
 
@@ -55,6 +48,165 @@ func _setup_materials() -> void:
 
 	_accent.albedo_color = Color(0.18, 0.32, 0.48)
 	_accent.roughness = 0.65
+
+
+func _build_castle_map() -> void:
+	var root := Node3D.new()
+	root.name = "CastleMap"
+	add_child(root)
+
+	var castle := CASTLE_SCENE.instantiate()
+	castle.name = "CastleSketchfab"
+	castle.scale = Vector3.ONE * CASTLE_SCALE
+	castle.position = -CASTLE_SOURCE_CENTER * CASTLE_SCALE
+	root.add_child(castle)
+	_add_mesh_collision_recursive(castle)
+
+
+func _build_safety_floor() -> void:
+	var floor_body := StaticBody3D.new()
+	floor_body.name = "SafetyFloor"
+	add_child(floor_body)
+
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(MAP_HALF * 2.4, 1.0, MAP_HALF * 2.4)
+	var collision := CollisionShape3D.new()
+	collision.shape = shape
+	collision.position = Vector3(0.0, -8.0, 0.0)
+	floor_body.add_child(collision)
+
+
+const TREE_POSITIONS: Array[Vector3] = [
+	Vector3(-85.0, 0.0, 55.0),
+	Vector3(85.0, 0.0, 55.0),
+	Vector3(-85.0, 0.0, -55.0),
+	Vector3(85.0, 0.0, -55.0),
+	Vector3(-60.0, 0.0, 75.0),
+	Vector3(60.0, 0.0, 75.0),
+	Vector3(-60.0, 0.0, -75.0),
+	Vector3(60.0, 0.0, -75.0),
+	Vector3(-95.0, 0.0, 15.0),
+	Vector3(95.0, 0.0, -15.0),
+	Vector3(-95.0, 0.0, -35.0),
+	Vector3(95.0, 0.0, 35.0),
+	Vector3(-45.0, 0.0, 90.0),
+	Vector3(45.0, 0.0, 90.0),
+	Vector3(-45.0, 0.0, -90.0),
+	Vector3(45.0, 0.0, -90.0),
+	Vector3(-30.0, 0.0, 50.0),
+	Vector3(30.0, 0.0, -50.0),
+	Vector3(-70.0, 0.0, -20.0),
+	Vector3(70.0, 0.0, 20.0),
+	Vector3(0.0, 0.0, 95.0),
+	Vector3(0.0, 0.0, -95.0),
+	Vector3(-110.0, 0.0, 0.0),
+	Vector3(110.0, 0.0, 0.0),
+]
+
+
+func _spawn_trees() -> void:
+	var root := Node3D.new()
+	root.name = "Trees"
+	add_child(root)
+
+	for i in range(TREE_POSITIONS.size()):
+		var pos: Vector3 = TREE_POSITIONS[i]
+		_add_tree(root, pos, 0.85 + float(i % 4) * 0.12, float(i % 6) * TAU / 6.0)
+
+
+func _add_tree(parent: Node3D, position: Vector3, scale_factor: float, rotation_y: float) -> void:
+	var body := StaticBody3D.new()
+	body.name = "Tree"
+	body.position = position
+	body.rotation.y = rotation_y
+	parent.add_child(body)
+
+	var model_root := Node3D.new()
+	model_root.name = "ModelRoot"
+	model_root.scale = Vector3.ONE * scale_factor
+	body.add_child(model_root)
+
+	if ResourceLoader.exists(TREE_SKETCHFAB):
+		var packed := load(TREE_SKETCHFAB) as PackedScene
+		if packed:
+			var model := packed.instantiate()
+			model.name = "TreeSketchfab"
+			model_root.add_child(model)
+			_add_mesh_collision_recursive(model)
+			return
+
+	ModelFactory.build_tree(model_root)
+	var trunk_mesh := model_root.get_node_or_null("Trunk") as MeshInstance3D
+	if trunk_mesh:
+		trunk_mesh.create_trimesh_collision()
+
+
+const GOBLIN_SPAWNS: Array[Vector3] = [
+	Vector3(-35.0, 0.0, 15.0),
+	Vector3(35.0, 0.0, 15.0),
+	Vector3(0.0, 0.0, -45.0),
+	Vector3(-55.0, 0.0, 30.0),
+	Vector3(55.0, 0.0, -30.0),
+	Vector3(-65.0, 0.0, -40.0),
+	Vector3(65.0, 0.0, 40.0),
+	Vector3(-40.0, 0.0, -65.0),
+	Vector3(40.0, 0.0, 65.0),
+	Vector3(0.0, 0.0, 30.0),
+	Vector3(-75.0, 0.0, 20.0),
+	Vector3(75.0, 0.0, -20.0),
+]
+
+const GOLEM_SPAWNS: Array[Vector3] = [
+	Vector3(-15.0, 0.0, 45.0),
+	Vector3(15.0, 0.0, 50.0),
+	Vector3(0.0, 0.0, 35.0),
+]
+
+const DRAGON_SPAWNS: Array[Vector3] = [
+	Vector3(0.0, 22.0, 0.0),
+]
+
+const HEALTH_PICKUP_POSITIONS: Array[Vector3] = [
+	Vector3(-25.0, 0.0, 25.0),
+	Vector3(25.0, 0.0, -25.0),
+	Vector3(-50.0, 0.0, 0.0),
+	Vector3(50.0, 0.0, 0.0),
+	Vector3(0.0, 0.0, 50.0),
+	Vector3(0.0, 0.0, -50.0),
+	Vector3(-70.0, 0.0, 45.0),
+	Vector3(70.0, 0.0, -45.0),
+]
+
+
+func _setup_enemy_spawner() -> void:
+	var spawner := EnemySpawner.new()
+	spawner.name = "EnemySpawner"
+	add_child(spawner)
+
+	for pos in GOBLIN_SPAWNS:
+		spawner.add_slot(GOBLIN_SCENE, pos)
+	for pos in GOLEM_SPAWNS:
+		spawner.add_slot(GOLEM_SCENE, pos)
+	for pos in DRAGON_SPAWNS:
+		spawner.add_slot(DRAGON_SCENE, pos)
+
+
+func _spawn_health_pickups() -> void:
+	var root := Node3D.new()
+	root.name = "HealthPickups"
+	add_child(root)
+
+	for pos in HEALTH_PICKUP_POSITIONS:
+		var pickup := HEALTH_PICKUP_SCENE.instantiate()
+		pickup.position = pos
+		root.add_child(pickup)
+
+
+func _add_mesh_collision_recursive(node: Node) -> void:
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh:
+		(node as MeshInstance3D).create_trimesh_collision()
+	for child in node.get_children():
+		_add_mesh_collision_recursive(child)
 
 
 func _build_floor() -> void:
@@ -267,97 +419,6 @@ func _build_cover_clusters() -> void:
 		_add_prop_crate(root, pos, Vector3(2.8, 1.5, 1.6))
 		_add_prop_barrel(root, Vector3(pos.x + 3.2, 0.45, pos.z))
 		_add_prop_crate(root, Vector3(pos.x - 2.5, 0.75, pos.z + 2.8), Vector3(2.0, 1.4, 2.0))
-
-
-func _spawn_targets() -> void:
-	var root := Node3D.new()
-	root.name = "Targets"
-	add_child(root)
-
-	var spots := [
-		[Vector3(0.0, 0.0, -25.0), 0.0],
-		[Vector3(-95.0, 0.0, -95.0), 0.4],
-		[Vector3(-45.0, 0.0, -95.0), -0.3],
-		[Vector3(-95.0, 0.0, -45.0), 0.8],
-		[Vector3(95.0, 0.0, -95.0), -0.4],
-		[Vector3(45.0, 0.0, -95.0), 0.3],
-		[Vector3(95.0, 0.0, -45.0), -0.8],
-		[Vector3(-95.0, 0.0, 95.0), 2.4],
-		[Vector3(-45.0, 0.0, 95.0), 2.0],
-		[Vector3(95.0, 0.0, 95.0), -2.4],
-		[Vector3(45.0, 0.0, 95.0), -2.0],
-		[Vector3(85.0, 0.0, 0.0), PI * 0.5],
-		[Vector3(85.0, 0.0, 35.0), PI * 0.5],
-		[Vector3(-85.0, 0.0, 0.0), -PI * 0.5],
-		[Vector3(-85.0, 0.0, -35.0), -PI * 0.5],
-		[Vector3(60.0, 0.0, -40.0), PI],
-		[Vector3(60.0, 0.0, 40.0), 0.0],
-		[Vector3(-60.0, 0.0, 40.0), PI],
-		[Vector3(-60.0, 0.0, -40.0), 0.0],
-		[Vector3(0.0, 2.4, 80.0), PI],
-		[Vector3(0.0, 2.4, -80.0), 0.0],
-		[Vector3(-28.0, 1.5, 72.0), 0.5],
-		[Vector3(28.0, 1.5, 72.0), -0.5],
-		[Vector3(-28.0, 1.5, -72.0), -0.5],
-		[Vector3(28.0, 1.5, -72.0), 0.5],
-		[Vector3(-12.0, 0.0, -55.0), 0.2],
-		[Vector3(12.0, 0.0, 55.0), -0.2],
-		[Vector3(-60.0, 0.0, 35.0), 1.2],
-		[Vector3(60.0, 0.0, -35.0), -1.2],
-		[Vector3(100.0, 0.0, -80.0), -0.8],
-		[Vector3(-100.0, 0.0, 80.0), 2.0],
-		[Vector3(40.0, 0.0, 100.0), PI * 1.1],
-		[Vector3(-40.0, 0.0, -100.0), PI * 0.9],
-		[Vector3(108.0, 0.0, 108.0), PI * 0.75],
-		[Vector3(-108.0, 0.0, 108.0), PI * 1.25],
-		[Vector3(108.0, 0.0, -108.0), -PI * 0.75],
-		[Vector3(-108.0, 0.0, -108.0), -PI * 1.25],
-		[Vector3(0.0, 0.0, 0.0), 0.0],
-		[Vector3(35.0, 0.0, 15.0), 0.6],
-		[Vector3(-35.0, 0.0, -15.0), -0.6],
-	]
-
-	for spot in spots:
-		var target := TARGET_SCENE.instantiate()
-		target.position = spot[0]
-		target.rotation.y = spot[1]
-		root.add_child(target)
-
-
-func _spawn_dragons() -> void:
-	var root := Node3D.new()
-	root.name = "Dragons"
-	add_child(root)
-
-	var dragon := DRAGON_SCENE.instantiate()
-	dragon.position = Vector3(0.0, 14.0, -40.0)
-	root.add_child(dragon)
-
-
-func _spawn_goblins() -> void:
-	var root := Node3D.new()
-	root.name = "Goblins"
-	add_child(root)
-
-	var spots: Array[Vector3] = [
-		Vector3(-40.0, 0.0, 0.0),
-		Vector3(40.0, 0.0, 0.0),
-		Vector3(0.0, 0.0, -55.0),
-		Vector3(-60.0, 0.0, 35.0),
-		Vector3(60.0, 0.0, -35.0),
-		Vector3(-70.0, 0.0, -55.0),
-		Vector3(70.0, 0.0, 55.0),
-		Vector3(-50.0, 0.0, -75.0),
-		Vector3(50.0, 0.0, 75.0),
-		Vector3(0.0, 0.0, 35.0),
-		Vector3(-85.0, 0.0, 30.0),
-		Vector3(85.0, 0.0, -30.0),
-	]
-
-	for spot in spots:
-		var goblin := GOBLIN_SCENE.instantiate()
-		goblin.position = spot
-		root.add_child(goblin)
 
 
 func _add_wall(wall_name: String, position: Vector3, size: Vector3, material: StandardMaterial3D) -> void:

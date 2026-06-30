@@ -1,5 +1,7 @@
 extends CharacterBody3D
 
+signal defeated
+
 enum State { IDLE, FLYING, LANDING, LANDED, TAKEOFF }
 
 const FLY_SPEED := 9.0
@@ -568,6 +570,7 @@ func _flash_hit() -> void:
 
 func _die() -> void:
 	_alive = false
+	defeated.emit()
 	roar_player.pitch_scale = 0.8
 	roar_player.play()
 	velocity = Vector3.ZERO

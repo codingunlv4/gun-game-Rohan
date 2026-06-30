@@ -89,6 +89,23 @@ func take_damage(amount: float, _hit_position: Vector3 = Vector3.ZERO) -> void:
 		_die()
 
 
+func heal(amount: float) -> bool:
+	if not _alive:
+		return false
+	if _health >= max_health:
+		return false
+
+	_health = minf(_health + amount, max_health)
+	ui_sound_player.stream = AudioFactory.health_restore()
+	ui_sound_player.play()
+	if hud:
+		var crosshair: Control = hud.get_node("Crosshair")
+		crosshair.modulate = Color(0.5, 1.0, 0.55)
+		var tween := create_tween()
+		tween.tween_property(crosshair, "modulate", Color.WHITE, 0.12)
+	return true
+
+
 func _flash_damage() -> void:
 	if not hud:
 		return

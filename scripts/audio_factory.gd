@@ -137,6 +137,48 @@ static func goblin_death() -> AudioStreamWAV:
 	, 0.3)
 
 
+static func golem_growl() -> AudioStreamWAV:
+	return _make_stream(func(t: float, _d: float) -> float:
+		var env := exp(-t * 8.0)
+		var rumble := sin(TAU * 42.0 * t) * 0.65 + sin(TAU * 28.0 * t) * 0.35
+		var noise := randf_range(-1.0, 1.0) * 0.2
+		return (rumble + noise) * env
+	, 0.35)
+
+
+static func golem_slam() -> AudioStreamWAV:
+	return _make_stream(func(t: float, _d: float) -> float:
+		var env := exp(-t * 11.0)
+		var boom := sin(TAU * 48.0 * t) * 0.85
+		var noise := randf_range(-1.0, 1.0) * 0.55
+		return (boom + noise) * env
+	, 0.45)
+
+
+static func golem_hit() -> AudioStreamWAV:
+	return _make_stream(func(t: float, _d: float) -> float:
+		var env := exp(-t * 20.0)
+		return sin(TAU * 180.0 * t) * env * 0.45
+	, 0.1)
+
+
+static func golem_death() -> AudioStreamWAV:
+	return _make_stream(func(t: float, _d: float) -> float:
+		var env := exp(-t * 7.0)
+		var crumble := sin(TAU * (120.0 - t * 80.0) * t) * 0.45
+		var noise := randf_range(-1.0, 1.0) * 0.4
+		return (crumble + noise) * env
+	, 0.55)
+
+
+static func health_restore() -> AudioStreamWAV:
+	return _make_stream(func(t: float, _d: float) -> float:
+		var env := exp(-t * 14.0)
+		var tone := sin(TAU * 520.0 * t) * 0.35 + sin(TAU * 780.0 * t) * 0.2
+		return tone * env
+	, 0.2)
+
+
 static func player_hurt() -> AudioStreamWAV:
 	return _make_stream(func(t: float, _d: float) -> float:
 		var env := exp(-t * 12.0)

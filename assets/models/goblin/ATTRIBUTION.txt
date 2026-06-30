@@ -1,0 +1,18 @@
+Goblin 3D model for this game:
+
+RECOMMENDED SKETCHFAB MODEL
+  Name: Goblin
+  URL: https://sketchfab.com/3d-models/goblin-2b753abc899648a5a16357be8a8db647
+  License: CC Attribution
+
+ALTERNATE SKETCHFAB MODEL
+  Name: Goblin (low poly)
+  URL: https://sketchfab.com/3d-models/goblin-low-poly-animated
+  License: CC Attribution (search Sketchfab for animated low-poly goblins)
+
+SETUP IN GODOT
+  1. Download the model from Sketchfab as GLB.
+  2. Save it to: assets/models/goblin/sketchfab/goblin.glb
+  3. Reopen the project so Godot imports the file.
+
+Until goblin.glb is added, the game uses a built-in procedural goblin placeholder.

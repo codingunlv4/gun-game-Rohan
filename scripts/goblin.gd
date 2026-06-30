@@ -1,5 +1,9 @@
 extends CharacterBody3D
 
+signal defeated
+
+const SKETCHFAB_MODEL := "res://assets/models/goblin/sketchfab/goblin.glb"
+const SKETCHFAB_SCALE := Vector3(1.8, 1.8, 1.8)
 const RUN_SPEED := 6.2
 const TURN_SPEED := 8.0
 const DETECT_RANGE := 55.0
@@ -52,12 +56,31 @@ func _setup_model() -> void:
 	for child in model_root.get_children():
 		child.queue_free()
 
+	_dagger = null
+	if ResourceLoader.exists(SKETCHFAB_MODEL):
+		var packed := load(SKETCHFAB_MODEL) as PackedScene
+		if packed:
+			var model := packed.instantiate()
+			model.name = "GoblinSketchfab"
+			model.scale = SKETCHFAB_SCALE
+			model_root.add_child(model)
+			_mesh_instances = _collect_mesh_instances(model)
+			return
+
 	var model := Node3D.new()
 	model.name = "GoblinModel"
 	model_root.add_child(model)
 	var built := ModelFactory.build_goblin(model)
 	_mesh_instances = built.meshes
 	_dagger = built.dagger
+
+
+func _collect_mesh_instances(node: Node, meshes: Array[MeshInstance3D] = []) -> Array[MeshInstance3D]:
+	if node is MeshInstance3D:
+		meshes.append(node)
+	for child in node.get_children():
+		_collect_mesh_instances(child, meshes)
+	return meshes
 
 
 func _physics_process(delta: float) -> void:
@@ -219,6 +242,7 @@ func _flash_hit() -> void:
 
 func _die() -> void:
 	_alive = false
+	defeated.emit()
 	death_player.play()
 	velocity = Vector3.ZERO
 	stab_area.monitoring = false

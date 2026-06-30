@@ -197,6 +197,100 @@ static func build_goblin(parent: Node3D) -> Dictionary:
 	}
 
 
+static func build_tree(parent: Node3D) -> Array[MeshInstance3D]:
+	_clear_children(parent)
+	var meshes: Array[MeshInstance3D] = []
+	var bark := _wood_dark()
+	var leaves := StandardMaterial3D.new()
+	leaves.albedo_color = Color(0.18, 0.48, 0.16)
+	leaves.roughness = 0.88
+
+	var trunk := _add_cylinder(parent, Vector3(0.0, 1.4, 0.0), 0.22, 2.8, bark, Vector3.AXIS_Y, "Trunk")
+	meshes.append(trunk)
+	var crown := _add_box(parent, Vector3(0.0, 3.2, 0.0), Vector3(2.4, 1.8, 2.4), leaves, "Crown")
+	meshes.append(crown)
+	var crown_top := _add_box(parent, Vector3(0.0, 4.1, 0.0), Vector3(1.6, 1.2, 1.6), leaves, "CrownTop")
+	meshes.append(crown_top)
+	return meshes
+
+
+static func build_health_pickup(parent: Node3D) -> Array[MeshInstance3D]:
+	_clear_children(parent)
+	var meshes: Array[MeshInstance3D] = []
+	var box_mat := StandardMaterial3D.new()
+	box_mat.albedo_color = Color(0.15, 0.75, 0.28)
+	box_mat.emission_enabled = true
+	box_mat.emission = Color(0.2, 0.95, 0.35)
+	box_mat.emission_energy_multiplier = 1.6
+	box_mat.roughness = 0.45
+
+	var cross_mat := StandardMaterial3D.new()
+	cross_mat.albedo_color = Color(0.95, 1.0, 0.95)
+	cross_mat.emission_enabled = true
+	cross_mat.emission = Color(0.85, 1.0, 0.9)
+	cross_mat.emission_energy_multiplier = 1.2
+
+	var box := _add_box(parent, Vector3(0.0, 0.7, 0.0), Vector3(1.2, 1.2, 1.2), box_mat, "HealthBox")
+	meshes.append(box)
+	var cross_v := _add_box(parent, Vector3(0.0, 0.7, 0.62), Vector3(0.22, 0.9, 0.08), cross_mat, "CrossVertical")
+	meshes.append(cross_v)
+	var cross_h := _add_box(parent, Vector3(0.0, 0.95, 0.62), Vector3(0.7, 0.22, 0.08), cross_mat, "CrossHorizontal")
+	meshes.append(cross_h)
+	return meshes
+
+
+static func build_golem(parent: Node3D) -> Dictionary:
+	_clear_children(parent)
+	var meshes: Array[MeshInstance3D] = []
+	var stone := _golem_stone()
+	var stone_dark := _golem_stone_dark()
+	var glow := _golem_rune_glow()
+
+	var pelvis := _add_box(parent, Vector3(0.0, 0.55, 0.0), Vector3(0.95, 0.55, 0.72), stone_dark, "Pelvis")
+	meshes.append(pelvis)
+	var torso := _add_box(parent, Vector3(0.0, 1.2, 0.0), Vector3(1.15, 0.95, 0.82), stone, "Torso")
+	meshes.append(torso)
+	var chest_core := _add_box(parent, Vector3(0.0, 1.18, -0.28), Vector3(0.42, 0.42, 0.12), glow, "ChestCore")
+	meshes.append(chest_core)
+	var head := _add_box(parent, Vector3(0.0, 1.95, 0.02), Vector3(0.62, 0.58, 0.58), stone, "Head")
+	meshes.append(head)
+	var brow := _add_box(parent, Vector3(0.0, 2.05, -0.22), Vector3(0.72, 0.16, 0.24), stone_dark, "Brow")
+	meshes.append(brow)
+
+	var leg_l := _add_box(parent, Vector3(-0.34, 0.22, 0.0), Vector3(0.34, 0.44, 0.34), stone_dark, "LegLeft")
+	meshes.append(leg_l)
+	var leg_r := _add_box(parent, Vector3(0.34, 0.22, 0.0), Vector3(0.34, 0.44, 0.34), stone_dark, "LegRight")
+	meshes.append(leg_r)
+	var foot_l := _add_box(parent, Vector3(-0.34, 0.02, 0.08), Vector3(0.4, 0.14, 0.52), stone, "FootLeft")
+	meshes.append(foot_l)
+	var foot_r := _add_box(parent, Vector3(0.34, 0.02, 0.08), Vector3(0.4, 0.14, 0.52), stone, "FootRight")
+	meshes.append(foot_r)
+
+	var arm_l := Node3D.new()
+	arm_l.name = "ArmLeft"
+	arm_l.position = Vector3(-0.72, 1.35, 0.0)
+	parent.add_child(arm_l)
+	var upper_l := _add_box(arm_l, Vector3(0.0, 0.05, 0.0), Vector3(0.34, 0.72, 0.34), stone, "UpperArm")
+	meshes.append(upper_l)
+	var fist_l := _add_box(arm_l, Vector3(0.0, -0.42, 0.0), Vector3(0.42, 0.42, 0.42), stone_dark, "Fist")
+	meshes.append(fist_l)
+
+	var arm_r := Node3D.new()
+	arm_r.name = "ArmRight"
+	arm_r.position = Vector3(0.72, 1.35, 0.0)
+	parent.add_child(arm_r)
+	var upper_r := _add_box(arm_r, Vector3(0.0, 0.05, 0.0), Vector3(0.34, 0.72, 0.34), stone, "UpperArm")
+	meshes.append(upper_r)
+	var fist_r := _add_box(arm_r, Vector3(0.0, -0.42, 0.0), Vector3(0.42, 0.42, 0.42), stone_dark, "Fist")
+	meshes.append(fist_r)
+
+	return {
+		"meshes": meshes,
+		"arm_left": arm_l,
+		"arm_right": arm_r,
+	}
+
+
 static func build_barrel(parent: Node3D) -> void:
 	_clear_children(parent)
 	var metal := _metal_dark()
@@ -405,4 +499,30 @@ static func _goblin_eye() -> StandardMaterial3D:
 	mat.emission_enabled = true
 	mat.emission = Color(1.0, 0.7, 0.05)
 	mat.emission_energy_multiplier = 1.5
+	return mat
+
+
+static func _golem_stone() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.42, 0.4, 0.38)
+	mat.metallic = 0.05
+	mat.roughness = 0.92
+	return mat
+
+
+static func _golem_stone_dark() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.28, 0.27, 0.25)
+	mat.metallic = 0.08
+	mat.roughness = 0.95
+	return mat
+
+
+static func _golem_rune_glow() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.72, 0.42, 0.12)
+	mat.emission_enabled = true
+	mat.emission = Color(0.95, 0.55, 0.12)
+	mat.emission_energy_multiplier = 1.8
+	mat.roughness = 0.65
 	return mat

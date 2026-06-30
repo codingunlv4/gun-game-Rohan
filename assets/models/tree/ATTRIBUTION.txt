@@ -1,0 +1,19 @@
+Tree 3D model for this game:
+
+RECOMMENDED SKETCHFAB MODEL
+  Name: Trees
+  URL: https://sketchfab.com/3d-models/trees-dbd3f20966de4cae9170413b9c6f891d
+  License: CC Attribution
+
+ALTERNATE SKETCHFAB MODEL
+  Name: Low Poly Tree Scene Free
+  URL: https://sketchfab.com/3d-models/low-poly-tree-scene-free
+  License: CC Attribution
+
+SETUP IN GODOT
+  1. Download the model from Sketchfab as GLB.
+  2. Save it to: assets/models/tree/sketchfab/tree.glb
+  3. Reopen the project so Godot imports the file.
+
+Until tree.glb is added, the game uses built-in procedural tree placeholders
+around the castle map.

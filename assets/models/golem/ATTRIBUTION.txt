@@ -1,0 +1,22 @@
+Golem 3D model for this game:
+
+RECOMMENDED SKETCHFAB MODEL
+  Name: Drugdor The Golem Animated
+  Author: Sketchfab creator (school animation project)
+  URL: https://sketchfab.com/3d-models/drugdor-the-golem-animated-19c1855bdb2c4cdc89da2cfb64da48cf
+  License: CC Attribution
+  Animations: Idle, Walk, Attack1, Attack2, Attack3
+
+ALTERNATE SKETCHFAB MODEL
+  Name: Lowpoly golem
+  Author: inoii
+  URL: https://sketchfab.com/3d-models/lowpoly-golem-0b3203f0338548d4b93f76197939172a
+  License: CC Attribution
+
+SETUP IN GODOT
+  1. Download the model from Sketchfab as GLB.
+  2. Save it to: assets/models/golem/sketchfab/golem.glb
+  3. Reopen the project so Godot imports the file.
+
+Until golem.glb is added, the game uses a built-in stone golem placeholder.
+The slam attack (wind-up lift, ground pound, AoE damage) works with both models.
